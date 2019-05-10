@@ -1,3 +1,4 @@
+
 # RightSignature API written in Python
 ## by Anton Kaiser
 
@@ -31,9 +32,15 @@ RightSignature.downloadSignedPDF(document,"./" + document.getGuid() + '.pdf')
 Classes/Objects
 ```
 CRightSignature:
-getDocuments() - Returns a CDocument Array - the CDocument is not full filled!
+getDocuments(date="alltime", debug=False) - Returns a CDocument Array - the CDocument is not full filled!
+	date: 'today', 'thisweek', 'thismonth', 'alltime'
+			or a date in the format 'yyyy-mm-dd'
+	debug: Print debug logs
+	hint: the script loads all pages!
 getDocument(documentGUID) - Returns a full CDocument
-downloadSignedPDF(CDocument, location) - Returns a void
+downloadSignedPDF(CDocument, location, debug=False) - Returns a void
+	debug: prints a message when a download failed
+	hint: when a download fails, the script will redownload the file
 isLoggedIn() - Returns a boolean
 ```
 

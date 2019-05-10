@@ -8,23 +8,44 @@ class CRightSignature:
 		r = requests.get('https://rightsignature.com/api/documents.json',headers = {'api-token': self.apikey})
 		if r.text == "Invalid OAuth Request":
 			self.valid = False
-	def getDocuments(self):
+	def getDocuments(self, date="alltime", debug=False):
 		if not self.valid:
 			return
-		r = requests.get('https://rightsignature.com/api/documents.json',headers = {'api-token': self.apikey})
+		if debug:
+			print("Loading page 1...")
+		r = requests.get('https://rightsignature.com/api/documents.json?account=true&per_page=50&page=1&range=' + date,headers = {'api-token': self.apikey})
+		pages = r.json()['page']['total_pages']
 		documents = list()
 		for doc in r.json()['page']['documents']:
 			documents.append(CDocument(doc))
+		if not int(pages) == 1:
+			for i in range(pages):
+				newvar = i + 1
+				if newvar == 1:
+					continue
+				if debug:
+					print("Loading page " + str(newvar) + "/" + str(pages) + " ...")
+				r2 = requests.get('https://rightsignature.com/api/documents.json?account=true&per_page=50&page=' + str(newvar) + '&range=' + date,headers = {'api-token': self.apikey})	
+				for doc2 in r2.json()['page']['documents']:
+					documents.append(CDocument(doc2))
+			
 		return documents
 	def getDocument(self,guid):
 		if not self.valid:
 			return
 		r = requests.get('https://rightsignature.com/api/documents/' + guid + '.json',headers = {'api-token': self.apikey})
 		return CDocument(r.json()['document'])
-	def downloadSignedPDF(self,document, saveLocation):
-		r = requests.get(urllib.parse.unquote(document.getSignedPdfUrl()))
-		with open(saveLocation, 'wb') as f:  
-			f.write(r.content)
+	def downloadSignedPDF(self,document, saveLocation, debug=False):
+		while True:
+			try:
+				r = requests.get(urllib.parse.unquote(document.getSignedPdfUrl()))
+				with open(saveLocation, 'wb') as f:  
+					f.write(r.content)
+				break
+			except Exception as e:
+				if debug:
+					print("Error! Trying new download!")
+				continue
 	def isLoggedIn(self):
 		return self.valid
 
@@ -44,7 +65,9 @@ class CDocument:
 				self.form_fields.append(CField(fieldata))
 		self.guid = data['guid']
 		self.is_trashed = data['is_trashed']
-		self.large_url = data['large_url']
+		self.large_url = ""
+		if "large_url" in data:
+			self.large_url = data['large_url']
 		self.last_activity_at = data['last_activity_at']
 		self.merge_state = data['merge_state']
 		self.message = data['message']
