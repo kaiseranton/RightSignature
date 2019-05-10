@@ -1,4 +1,5 @@
 
+
 # RightSignature API written in Python
 ## by Anton Kaiser
 
@@ -35,6 +36,10 @@ CRightSignature:
 getDocuments(date="alltime", debug=False) - Returns a CDocument Array - the CDocument is not full filled!
 	date: 'today', 'thisweek', 'thismonth', 'alltime'
 			or a date in the format 'yyyy-mm-dd'
+	debug: Print debug logs
+	hint: the script loads all pages!
+getDocumentsRange(dateStart="2019-01-25", dateEnd="2019-05-25", debug=False) - Returns a CDocument Array - the CDocument is not full filled!
+	dateStart/dateEnd: in the format 'yyyy-mm-dd'
 	debug: Print debug logs
 	hint: the script loads all pages!
 getDocument(documentGUID) - Returns a full CDocument

@@ -6,9 +6,10 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="rightsignature",
 	install_requires=[
-          'requests>=2.21.0'
+          'requests>=2.21.0',
+		  'datetime>=4.3'
       ],
-    version="1.0",
+    version="1.2",
     author='Anton Kaiser',
     author_email='kaiser@kaiser.ovh',
     description="RightSignature API written in python",

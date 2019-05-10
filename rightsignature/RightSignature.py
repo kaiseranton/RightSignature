@@ -1,6 +1,13 @@
 import requests
 import urllib.parse
+import datetime
+from datetime import timedelta, date
 
+def daterange(start_date, end_date):
+    for n in range(int ((end_date - start_date).days)):
+        yield start_date + timedelta(n)	
+	
+	
 class CRightSignature:
 	def __init__(self, key):
 		self.apikey = key
@@ -28,6 +35,34 @@ class CRightSignature:
 				r2 = requests.get('https://rightsignature.com/api/documents.json?account=true&per_page=50&page=' + str(newvar) + '&range=' + date,headers = {'api-token': self.apikey})	
 				for doc2 in r2.json()['page']['documents']:
 					documents.append(CDocument(doc2))
+			
+		return documents
+	def getDocumentsRange(self, dateStart="2019-01-25", dateEnd="2019-05-25", debug=False):
+		if not self.valid:
+			return
+		date1 = str(dateStart)
+		date2 = str(dateEnd)
+		real_date1 = datetime.date(*[int(x) for x in date1.split('-')])
+		real_date2 = datetime.date(*[int(x) for x in date2.split('-')]) + timedelta(days=+1) 
+		documents = list()
+
+		for single_date in daterange(real_date1, real_date2):
+			if debug:
+				print("Loading page 1 on date " + single_date.strftime("%Y-%m-%d") + "...")
+			r = requests.get('https://rightsignature.com/api/documents.json?account=true&per_page=50&page=1&range=' + single_date.strftime("%Y-%m-%d"),headers = {'api-token': self.apikey})
+			pages = r.json()['page']['total_pages']
+			for doc in r.json()['page']['documents']:
+				documents.append(CDocument(doc))
+			if not int(pages) == 1:
+				for i in range(pages):
+					newvar = i + 1
+					if newvar == 1:
+						continue
+					if debug:
+						print("Loading page " + str(newvar) + "/" + str(pages) + "  on date " + single_date.strftime("%Y-%m-%d") + "...")
+					r2 = requests.get('https://rightsignature.com/api/documents.json?account=true&per_page=50&page=' + str(newvar) + '&range=' + single_date.strftime("%Y-%m-%d"),headers = {'api-token': self.apikey})	
+					for doc2 in r2.json()['page']['documents']:
+						documents.append(CDocument(doc2))
 			
 		return documents
 	def getDocument(self,guid):
